@@ -7,32 +7,39 @@ import java.sql.SQLException;
 public class DataConnection {
 
     // ⚙️ Cấu hình kết nối SQL Server
-    private static final String SERVER_NAME = "MEOW\\SQLEXPRESS"; // hoặc "MEOW\\SQLEXPRESS" nếu bạn dùng instance
-    private static final String DB_NAME = "QUANLYSPA";
-    private static final String USER = "sa";
-    private static final String PASS = "Meow#meow.999"; // <-- đổi lại mật khẩu của bạn
-    private static final boolean ENCRYPT = false; // đặt true nếu dùng SSL
+    private static final String SERVER_NAME = "MEOW\\SQLEXPRESS"; // Tên máy + instance
+    private static final String DB_NAME = "QuanLySpa"; // Đúng với tên DB bạn tạo
+    private static final String USER = "ThienMan"; // <-- Hoặc 'sa' nếu bạn dùng tài khoản sa
+    private static final String PASS = "123456"; // Mật khẩu SQL Server
+    private static final boolean ENCRYPT = false; // Nếu chưa cấu hình SSL, để false
 
     // ✅ URL kết nối JDBC
     private static final String DB_URL = String.format(
-            "jdbc:sqlserver://%s:1433;databaseName=%s;encrypt=%s;trustServerCertificate=true;",
-            SERVER_NAME, DB_NAME, ENCRYPT
+        "jdbc:sqlserver://%s:1433;databaseName=%s;encrypt=%s;trustServerCertificate=true;",
+        SERVER_NAME, DB_NAME, ENCRYPT
     );
 
     // 🔌 Hàm tạo kết nối
     public static Connection getConnection() {
-        Connection conn = null;
         try {
+            // Load driver (JDBC)
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+
+            // Kết nối
+            Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
             System.out.println("✅ Kết nối cơ sở dữ liệu thành công!");
-        } catch (SQLException | ClassNotFoundException e) {
-            System.err.println("❌ Lỗi kết nối cơ sở dữ liệu: " + e.getMessage());
+            return conn;
+
+        } catch (ClassNotFoundException e) {
+            System.err.println("❌ Không tìm thấy JDBC Driver: " + e.getMessage());
+        } catch (SQLException e) {
+            System.err.println("❌ Lỗi SQL khi kết nối: " + e.getMessage());
+            System.err.println("🔎 URL: " + DB_URL);
         }
-        return conn;
+        return null;
     }
 
-    // 🔒 Hàm đóng kết nối
+    // 🔒 Đóng kết nối
     public static void closeConnection(Connection conn) {
         if (conn != null) {
             try {
@@ -44,11 +51,13 @@ public class DataConnection {
         }
     }
 
-    // 🧪 Hàm test kết nối
+    // 🧪 Kiểm tra thử
     public static void main(String[] args) {
         Connection testConn = getConnection();
         if (testConn != null) {
             closeConnection(testConn);
+        } else {
+            System.out.println("🚫 Kết nối thất bại, vui lòng kiểm tra lại cấu hình!");
         }
     }
 }
